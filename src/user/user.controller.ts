@@ -27,6 +27,12 @@ export class UserController {
     return this.userService.update(req.user.userId, updateUserDto);
   }
 
+  @Get('tenant/members')
+  @UseGuards(JwtAuthGuard)
+  async getTenantMembers(@Request() req) {
+    return this.userService.findByTenant(req.user.tenantId);
+  }
+
   @Get('tenant/:tenantId')
   @Roles(Role.PLATFORM_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
   findByTenant(@Param('tenantId') tenantId: string) {
@@ -55,6 +61,13 @@ export class UserController {
   @Roles(Role.PLATFORM_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
   deactivateUser(@Param('id') id: string) {
     return this.userService.deactivateUser(id);
+  }
+
+  @Delete('tenant/members/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  async removeTenantMember(@Param('id') id: string, @Request() req) {
+    return this.userService.removeTenantMember(id, req.user.userId, req.user.tenantId);
   }
 
   @Delete(':id')

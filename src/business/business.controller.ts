@@ -29,6 +29,12 @@ export class BusinessController {
     return this.businessService.findByTenant(tenantId);
   }
 
+  @Get('my-business')
+  @Roles(Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  async getMyBusiness(@Request() req) {
+    return this.businessService.findByTenant(req.user.tenantId);
+  }
+
   @Get(':id')
   @Roles(Role.PLATFORM_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
   async findOne(@Param('id') id: string) {
