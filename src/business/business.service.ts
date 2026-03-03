@@ -23,15 +23,12 @@ export class BusinessService {
   }
 
   async findAll(): Promise<Business[]> {
-    return this.businessRepository.find({
-      relations: ['categories', 'userEntities'],
-    });
+    return this.businessRepository.find();
   }
 
   async findOne(id: string): Promise<Business> {
     const business = await this.businessRepository.findOne({
       where: { id },
-      relations: ['categories', 'userEntities'],
     });
 
     if (!business) {
@@ -41,11 +38,12 @@ export class BusinessService {
     return business;
   }
 
-  async findByTenant(tenantId: string): Promise<Business[]> {
-    return this.businessRepository.find({
+  async findByTenant(tenantId: string): Promise<Business | null> {
+    const businesses = await this.businessRepository.find({
       where: { tenantId },
-      relations: ['categories', 'userEntities'],
+      take: 1,
     });
+    return businesses[0] || null;
   }
 
   async update(id: string, updateBusinessDto: Partial<CreateBusinessDto>): Promise<Business> {

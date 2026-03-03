@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../shared/enums/role.enum';
@@ -100,7 +100,17 @@ export class AuthService {
     }
 
     // TODO: Send verification email
-    console.log(`Email verification token for ${user.email}: ${verificationToken}`);
+    try {
+      await this.emailService.sendVerificationEmail(
+        savedUser.email,
+        savedUser.firstName,
+        verificationToken,
+      );
+      console.log(`Verification email sent to ${savedUser.email}`);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Don't throw - registration is still successful even if email fails
+    }
 
     const { password, emailVerificationToken: dbVerificationToken, ...userWithoutSensitiveData } = savedUser;
 
@@ -184,8 +194,14 @@ export class AuthService {
 
     await this.userRepository.save(user);
 
-    // TODO: Send reset email
-    console.log(`Password reset token for ${user.email}: ${resetToken}`);
+    // Send password reset email
+    try {
+      await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+      console.log(`Password reset email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+      // Don't throw - we still return success to prevent email enumeration
+    }
 
     return {
       message: 'Password reset instructions sent to your email',
@@ -196,7 +212,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { 
         passwordResetToken: confirmResetDto.token,
-        passwordResetExpires: { $gt: new Date() } as any,
+        passwordResetExpires: MoreThan(new Date()),
       },
     });
 
@@ -220,7 +236,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { 
         emailVerificationToken: verifyEmailDto.token,
-        emailVerificationExpires: { $gt: new Date() } as any,
+        emailVerificationExpires: MoreThan(new Date()),
       },
     });
 

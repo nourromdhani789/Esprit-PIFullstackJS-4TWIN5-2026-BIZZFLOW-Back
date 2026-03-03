@@ -37,6 +37,18 @@ export class Business {
   @Column({ nullable: true })
   website: string;
 
+  @Column({ nullable: true })
+  logoUrl: string;
+
+  @Column({ nullable: true })
+  primaryColor: string;
+
+  @Column({ nullable: true })
+  secondaryColor: string;
+
+  @Column({ nullable: true })
+  accentColor: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -1,5 +1,8 @@
-import { Controller, Post, Body, Get, UseGuards, Request, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, Param, Delete, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
+import { User } from '../user/entities/user.entity';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { CreateInvitationDto } from './dtos/create-invitation.dto';
@@ -14,7 +17,11 @@ import { Role } from '../shared/enums/role.enum';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
@@ -39,7 +46,15 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Request() req) {
-    return req.user;
+    const user = await this.userRepository.findOne({
+      where: { id: req.user.userId },
+      relations: ['tenant'],
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   @Post('verify-email')

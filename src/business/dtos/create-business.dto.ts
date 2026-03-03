@@ -33,6 +33,22 @@ export class CreateBusinessDto {
   @IsString()
   website: string;
 
+  @IsOptional()
+  @IsString()
+  logoUrl: string;
+
+  @IsOptional()
+  @IsString()
+  primaryColor: string;
+
+  @IsOptional()
+  @IsString()
+  secondaryColor: string;
+
+  @IsOptional()
+  @IsString()
+  accentColor: string;
+
   @IsEnum(TenantStatus)
   status?: TenantStatus;
 }

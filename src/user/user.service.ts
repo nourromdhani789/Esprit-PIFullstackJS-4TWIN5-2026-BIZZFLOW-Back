@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { Role } from '../shared/enums/role.enum';
 
 @Injectable()
 export class UserService {
@@ -55,6 +56,27 @@ export class UserService {
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
+  }
+
+  async removeTenantMember(id: string, currentUserId: string, tenantId: string): Promise<void> {
+    const userToDelete = await this.findOne(id);
+    
+    // Check if user belongs to the same tenant
+    if (userToDelete.tenantId !== tenantId) {
+      throw new ForbiddenException('You can only delete members from your own tenant');
+    }
+    
+    // Prevent deleting yourself
+    if (id === currentUserId) {
+      throw new ForbiddenException('You cannot delete yourself');
+    }
+    
+    // Prevent deleting BUSINESS_OWNER
+    if (userToDelete.roleId === Role.BUSINESS_OWNER) {
+      throw new ForbiddenException('Cannot delete the business owner');
+    }
+    
+    await this.userRepository.remove(userToDelete);
   }
 
   async activateUser(id: string): Promise<User> {
