@@ -13,8 +13,8 @@ export class UserController {
 
   @Get()
   @Roles(Role.PLATFORM_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Request() req) {
+    return this.userService.findByTenant(req.user.tenantId);
   }
 
   @Get('profile')

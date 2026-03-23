@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { BusinessService } from './business.service';
 import { CreateBusinessDto } from './dtos/create-business.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -45,6 +48,53 @@ export class BusinessController {
   @Roles(Role.PLATFORM_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
   async update(@Param('id') id: string, @Body() updateBusinessDto: Partial<CreateBusinessDto>) {
     return this.businessService.update(id, updateBusinessDto);
+  }
+
+  @Post('upload-logo')
+  @Roles(Role.PLATFORM_ADMIN, Role.BUSINESS_OWNER, Role.BUSINESS_ADMIN)
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      storage: diskStorage({
+        destination: './uploads/logos',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `logo-${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+          return callback(new Error('Only image files are allowed!'), false);
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  async uploadLogo(
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+    
+    const logoUrl = `/uploads/logos/${file.filename}`;
+    
+    // Update the business with the new logo URL
+    const business = await this.businessService.findByTenant(req.user.tenantId);
+    if (!business) {
+      throw new Error('Business not found');
+    }
+    
+    await this.businessService.update(business.id, { logoUrl });
+    
+    return {
+      logoUrl,
+      message: 'Logo uploaded successfully',
+    };
   }
 
   @Delete(':id')
