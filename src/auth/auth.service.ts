@@ -159,11 +159,16 @@ export class AuthService {
 
     await this.userRepository.save(user);
 
+    const business = await this.businessRepository.findOne({
+      where: { tenantId: user.tenantId },
+    });
+
     const payload = {
       sub: user.id,
       email: user.email,
       roleId: user.roleId,
       tenantId: user.tenantId,
+      businessId: business?.id,
     };
 
     const access_token = this.jwtService.sign(payload);
@@ -357,6 +362,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepository.findOne({
       where: { email },
+      relations: ['tenant'],
     });
 
     if (user && await bcrypt.compare(password, user.password)) {

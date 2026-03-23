@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TenantModule } from './tenant/tenant.module';
 import { BusinessModule } from './business/business.module';
+import { ProductModule } from './product/product.module';
+import { InvoiceModule } from './invoice/invoice.module';
 import { databaseConfig } from './config/database.config';
 
 @Module({
@@ -19,6 +21,8 @@ import { databaseConfig } from './config/database.config';
     UserModule,
     TenantModule,
     BusinessModule,
+    ProductModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

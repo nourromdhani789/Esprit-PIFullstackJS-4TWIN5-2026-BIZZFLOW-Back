@@ -3,6 +3,9 @@ import { User } from '../user/entities/user.entity';
 import { Tenant } from '../tenant/entities/tenant.entity';
 import { Business } from '../business/entities/business.entity';
 import { Invitation } from '../auth/entities/invitation.entity';
+import { Product } from '../product/entities/product.entity';
+import { Invoice } from '../invoice/entities/invoice.entity';
+import { InvoiceItem } from '../invoice/entities/invoice-item.entity';
 
 export const databaseConfig: TypeOrmModuleOptions = {
   type: 'mysql',
@@ -11,7 +14,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'pi_twin5_db',
-  entities: [User, Tenant, Business, Invitation], 
+  entities: [User, Tenant, Business, Invitation, Product, Invoice, InvoiceItem], 
   synchronize: true, // Enable to create/update tables automatically
   logging: true, 
 };
