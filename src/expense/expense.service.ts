@@ -64,7 +64,7 @@ export class ExpenseService {
     userRole: string
   ): Promise<Expense> {
     // Only admin or business owner can approve
-    if (userRole !== 'admin' && userRole !== 'owner') {
+    if (userRole !== 'PLATFORM_ADMIN' && userRole !== 'BUSINESS_OWNER' && userRole !== 'BUSINESS_ADMIN') {
       throw new ForbiddenException('Only admin or owner can approve expenses');
     }
 

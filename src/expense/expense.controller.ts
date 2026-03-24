@@ -107,7 +107,7 @@ export class ExpenseController {
     @Request() req
   ) {
     // Get user role from JWT payload
-    const userRole = req.user.role || 'user';
+    const userRole = req.user.roleId || req.user.role || 'user';
     return this.expenseService.approve(id, req.user.businessId, approveDto, userRole);
   }
 }
