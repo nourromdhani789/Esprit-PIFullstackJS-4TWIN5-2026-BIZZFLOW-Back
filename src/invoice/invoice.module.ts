@@ -7,10 +7,12 @@ import { InvoiceItem } from './entities/invoice-item.entity';
 import { PdfService } from './services/pdf.service';
 import { EmailService } from '../shared/services/email.service';
 
+import { AiScannerService } from '../expense/services/ai-scanner.service';
+
 @Module({
   imports: [TypeOrmModule.forFeature([Invoice, InvoiceItem])],
   controllers: [InvoiceController],
-  providers: [InvoiceService, PdfService, EmailService],
+  providers: [InvoiceService, PdfService, EmailService, AiScannerService],
   exports: [InvoiceService],
 })
 export class InvoiceModule {}

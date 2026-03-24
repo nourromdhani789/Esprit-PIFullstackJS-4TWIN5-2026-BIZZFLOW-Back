@@ -11,6 +11,8 @@ import { ProductModule } from './product/product.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { databaseConfig } from './config/database.config';
 
+import { ExpenseModule } from './expense/expense.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,6 +25,7 @@ import { databaseConfig } from './config/database.config';
     BusinessModule,
     ProductModule,
     InvoiceModule,
+    ExpenseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

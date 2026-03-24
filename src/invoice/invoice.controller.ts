@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, Res, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, Res, HttpCode, HttpStatus, BadRequestException, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import type { Response as ExpressResponse } from 'express';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto, UpdateInvoiceDto, SendInvoiceEmailDto } from './dto/invoice.dto';
@@ -6,6 +9,16 @@ import { InvoiceStatus } from './entities/invoice.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PdfService } from './services/pdf.service';
 import { EmailService } from '../shared/services/email.service';
+import { AiScannerService } from '../expense/services/ai-scanner.service';
+
+const scanStorage = diskStorage({
+  destination: './uploads/scans',
+  filename: (req, file, callback) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = extname(file.originalname);
+    callback(null, `scan-${uniqueSuffix}${ext}`);
+  },
+});
 
 @Controller('invoices')
 @UseGuards(JwtAuthGuard)
@@ -14,6 +27,7 @@ export class InvoiceController {
     private readonly invoiceService: InvoiceService,
     private readonly pdfService: PdfService,
     private readonly emailService: EmailService,
+    private readonly aiScannerService: AiScannerService,
   ) {}
 
   @Post()
@@ -64,5 +78,45 @@ export class InvoiceController {
     const pdfBuffer = await this.pdfService.generateInvoicePdf(invoice);
     await this.emailService.sendInvoiceEmail(sendDto.email, invoice, pdfBuffer, sendDto.subject, sendDto.message);
     return { message: 'Invoice sent successfully' };
+  }
+
+  @Post('upload-scan')
+  @UseInterceptors(
+    FileInterceptor('document', {
+      storage: scanStorage,
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
+      },
+      fileFilter: (req, file, callback) => {
+        const allowedTypes = /jpeg|jpg|png|gif|pdf/;
+        const ext = extname(file.originalname).toLowerCase();
+        const mimetype = allowedTypes.test(file.mimetype);
+        const extnameValid = allowedTypes.test(ext.replace('.', ''));
+        
+        if (mimetype && extnameValid) {
+          return callback(null, true);
+        }
+        callback(new BadRequestException('Only image and PDF files are allowed'), false);
+      },
+    }),
+  )
+  async uploadScan(@UploadedFile() file: Express.Multer.File, @Request() req) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    // Get mock AI scan results (adapted for invoice data)
+    const aiResult = await this.aiScannerService.scanReceipt(file);
+
+    // Transform to invoice-compatible format
+    return {
+      scanUrl: `/uploads/scans/${file.filename}`,
+      aiExtracted: {
+        totalAmount: aiResult.amount,
+        date: aiResult.date,
+        clientName: aiResult.supplier,
+        confidence: aiResult.confidence,
+      },
+    };
   }
 }
