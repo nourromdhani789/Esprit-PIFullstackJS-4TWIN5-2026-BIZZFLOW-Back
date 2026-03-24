@@ -2,6 +2,14 @@ import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 
+interface InvoiceEmailData {
+  invoiceNumber: string;
+  totalAmount: number | string;
+  status: string;
+  dueDate?: Date | string;
+  business?: { name?: string };
+}
+
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
@@ -13,6 +21,43 @@ export class EmailService {
         user: 'oussemadenguir999@gmail.com',
         pass: 'dosv hhgf irdy ueht',
       },
+    });
+  }
+
+  async sendInvoiceEmail(
+    to: string,
+    invoice: InvoiceEmailData,
+    pdfBuffer: Buffer,
+    subject?: string,
+    message?: string,
+  ): Promise<void> {
+    const emailSubject = subject || `Invoice #${invoice.invoiceNumber} from ${invoice.business?.name || 'Your Business'}`;
+    const emailMessage = message || `Please find attached invoice #${invoice.invoiceNumber}.`;
+
+    await this.transporter.sendMail({
+      from: `"${invoice.business?.name || 'Your Business'}" <oussemadenguir999@gmail.com>`,
+      to,
+      subject: emailSubject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #465fff;">${emailSubject}</h2>
+          <p>${emailMessage}</p>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Invoice Number:</strong> #${invoice.invoiceNumber}</p>
+            <p><strong>Amount Due:</strong> $${Number(invoice.totalAmount).toFixed(2)}</p>
+            <p><strong>Status:</strong> ${invoice.status.toUpperCase()}</p>
+            ${invoice.dueDate ? `<p><strong>Due Date:</strong> ${new Date(invoice.dueDate).toLocaleDateString()}</p>` : ''}
+          </div>
+          <p style="color: #666; font-size: 14px;">Please find the detailed invoice attached to this email.</p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `invoice-${invoice.invoiceNumber}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
     });
   }
 
