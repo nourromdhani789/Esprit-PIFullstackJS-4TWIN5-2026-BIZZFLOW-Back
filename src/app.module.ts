@@ -10,8 +10,8 @@ import { BusinessModule } from './business/business.module';
 import { ProductModule } from './product/product.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { databaseConfig } from './config/database.config';
-
 import { ExpenseModule } from './expense/expense.module';
+import { ReportingModule } from './reporting/reporting.module';
 
 @Module({
   imports: [
@@ -26,6 +26,7 @@ import { ExpenseModule } from './expense/expense.module';
     ProductModule,
     InvoiceModule,
     ExpenseModule,
+    ReportingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
