@@ -21,6 +21,15 @@ export class Product {
   @Column({ name: 'business_id' })
   businessId: string;
 
+  @Column({ type: 'int', default: 0 })
+  quantity: number;
+
+  @Column({ type: 'int', default: 0, name: 'minimum_stock' })
+  minimumStock: number;
+
+  @Column({ type: 'varchar', length: 50, default: 'active' })
+  status: string;
+
   @ManyToOne(() => Business, business => business.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'business_id' })
   business: Business;
