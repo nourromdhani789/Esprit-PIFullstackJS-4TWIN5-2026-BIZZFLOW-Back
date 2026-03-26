@@ -12,6 +12,12 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { databaseConfig } from './config/database.config';
 import { ExpenseModule } from './expense/expense.module';
 import { ReportingModule } from './reporting/reporting.module';
+import { StockMovementModule } from './stock-movement/stock-movement.module';
+import { PurchaseOrderModule } from './purchase-order/purchase-order.module';
+import { CreditNoteModule } from './credit-note/credit-note.module';
+import { PaymentModule } from './payment/payment.module';
+import { CashModule } from './cash/cash.module';
+import { StockTakeModule } from './stock-take/stock-take.module';
 
 @Module({
   imports: [
@@ -27,6 +33,12 @@ import { ReportingModule } from './reporting/reporting.module';
     InvoiceModule,
     ExpenseModule,
     ReportingModule,
+    StockMovementModule,
+    PurchaseOrderModule,
+    CreditNoteModule,
+    PaymentModule,
+    CashModule,
+    StockTakeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

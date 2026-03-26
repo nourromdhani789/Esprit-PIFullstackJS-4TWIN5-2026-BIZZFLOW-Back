@@ -14,10 +14,10 @@ export class InvoiceItem {
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
 
-  @Column({ name: 'product_id' })
-  productId: string;
+  @Column({ name: 'product_id', nullable: true })
+  productId: string | null;
 
-  @ManyToOne(() => Product, { nullable: true })
+  @ManyToOne(() => Product, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'product_id' })
   product: Product;
 

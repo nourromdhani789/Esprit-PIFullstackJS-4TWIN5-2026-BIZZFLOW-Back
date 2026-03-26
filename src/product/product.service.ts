@@ -3,23 +3,54 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { StockMovement } from '../stock-movement/entities/stock-movement.entity';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(StockMovement)
+    private stockMovementRepository: Repository<StockMovement>,
   ) {}
 
   async create(businessId: string, createProductDto: CreateProductDto): Promise<Product> {
+    const { initialQuantity, minimumStock, ...productData } = createProductDto;
+    
     const product = this.productRepository.create({
-      ...createProductDto,
+      ...productData,
+      quantity: initialQuantity || 0,
+      minimumStock: minimumStock || 0,
       businessId,
     });
-    return this.productRepository.save(product);
+    
+    const savedProduct = await this.productRepository.save(product);
+    
+    // Create initial stock movement if quantity provided
+    if (initialQuantity && initialQuantity > 0) {
+      const movement = this.stockMovementRepository.create({
+        productId: savedProduct.id,
+        type: 'IN',
+        quantity: initialQuantity,
+        reason: 'initial',
+        notes: 'Initial stock setup',
+        date: new Date(),
+        businessId,
+      });
+      await this.stockMovementRepository.save(movement);
+    }
+    
+    return savedProduct;
   }
 
   async findAll(businessId: string): Promise<Product[]> {
+    // If no businessId, return all products (for backwards compatibility)
+    if (!businessId) {
+      return this.productRepository.find({
+        order: { createdAt: 'DESC' },
+      });
+    }
+    
     return this.productRepository.find({
       where: { businessId },
       order: { createdAt: 'DESC' },
