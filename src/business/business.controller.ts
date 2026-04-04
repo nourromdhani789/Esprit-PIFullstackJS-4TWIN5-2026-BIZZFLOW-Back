@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Request, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ClassSerializerInterceptor } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { BusinessService } from './business.service';
@@ -11,6 +12,7 @@ import { Role } from '../shared/enums/role.enum';
 
 @Controller('businesses')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 

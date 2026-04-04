@@ -91,8 +91,8 @@ export class PdfService {
 
         <div class="section">
           <div class="section-title">Bill To</div>
-          <div class="client-name">${invoice.clientName || 'Client'}</div>
-          ${invoice.clientEmail ? `<div>${invoice.clientEmail}</div>` : ''}
+          <div class="client-name">${invoice.client?.name || 'Client'}</div>
+          ${invoice.client?.email ? `<div>${invoice.client.email}</div>` : ''}
         </div>
 
         <table>

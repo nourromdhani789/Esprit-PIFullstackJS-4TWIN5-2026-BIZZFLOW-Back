@@ -10,6 +10,22 @@ interface InvoiceEmailData {
   business?: { name?: string };
 }
 
+interface QuoteEmailData {
+  quoteNumber: string;
+  totalAmount: number | string;
+  status: string;
+  expiryDate?: Date | string;
+  business?: { name?: string };
+}
+
+interface SalesOrderEmailData {
+  salesOrderNumber: string;
+  totalAmount: number | string;
+  status: string;
+  expectedDeliveryDate?: Date | string;
+  business?: { name?: string };
+}
+
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
@@ -54,6 +70,80 @@ export class EmailService {
       attachments: [
         {
           filename: `invoice-${invoice.invoiceNumber}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
+    });
+  }
+
+  async sendQuoteEmail(
+    to: string,
+    quote: QuoteEmailData,
+    pdfBuffer: Buffer,
+    subject?: string,
+    message?: string,
+  ): Promise<void> {
+    const emailSubject = subject || `Quote #${quote.quoteNumber} from ${quote.business?.name || 'Your Business'}`;
+    const emailMessage = message || `Please find attached quote #${quote.quoteNumber}.`;
+
+    await this.transporter.sendMail({
+      from: `"${quote.business?.name || 'Your Business'}" <oussemadenguir999@gmail.com>`,
+      to,
+      subject: emailSubject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #465fff;">${emailSubject}</h2>
+          <p>${emailMessage}</p>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Quote Number:</strong> #${quote.quoteNumber}</p>
+            <p><strong>Total Amount:</strong> $${Number(quote.totalAmount).toFixed(2)}</p>
+            <p><strong>Status:</strong> ${quote.status.toUpperCase()}</p>
+            ${quote.expiryDate ? `<p><strong>Valid Until:</strong> ${new Date(quote.expiryDate).toLocaleDateString()}</p>` : ''}
+          </div>
+          <p style="color: #666; font-size: 14px;">Please find the detailed quote attached to this email.</p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `quote-${quote.quoteNumber}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
+    });
+  }
+
+  async sendSalesOrderEmail(
+    to: string,
+    salesOrder: SalesOrderEmailData,
+    pdfBuffer: Buffer,
+    subject?: string,
+    message?: string,
+  ): Promise<void> {
+    const emailSubject = subject || `Sales Order #${salesOrder.salesOrderNumber} from ${salesOrder.business?.name || 'Your Business'}`;
+    const emailMessage = message || `Please find attached sales order #${salesOrder.salesOrderNumber}.`;
+
+    await this.transporter.sendMail({
+      from: `"${salesOrder.business?.name || 'Your Business'}" <oussemadenguir999@gmail.com>`,
+      to,
+      subject: emailSubject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #465fff;">${emailSubject}</h2>
+          <p>${emailMessage}</p>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Sales Order Number:</strong> #${salesOrder.salesOrderNumber}</p>
+            <p><strong>Total Amount:</strong> $${Number(salesOrder.totalAmount).toFixed(2)}</p>
+            <p><strong>Status:</strong> ${salesOrder.status.toUpperCase()}</p>
+            ${salesOrder.expectedDeliveryDate ? `<p><strong>Expected Delivery:</strong> ${new Date(salesOrder.expectedDeliveryDate).toLocaleDateString()}</p>` : ''}
+          </div>
+          <p style="color: #666; font-size: 14px;">Please find the detailed sales order attached to this email.</p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `sales-order-${salesOrder.salesOrderNumber}.pdf`,
           content: pdfBuffer,
           contentType: 'application/pdf',
         },

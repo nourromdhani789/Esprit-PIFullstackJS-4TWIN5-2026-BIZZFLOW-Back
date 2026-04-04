@@ -4,6 +4,8 @@ import { Repository, DataSource } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { Cash } from '../cash/entities/cash.entity';
 import { CreatePaymentDto, UpdatePaymentDto, PaymentFilterDto } from './dto/payment.dto';
+import { AuditService } from '../audit/audit.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class PaymentService {
@@ -13,9 +15,11 @@ export class PaymentService {
     @InjectRepository(Cash)
     private readonly cashRepository: Repository<Cash>,
     private readonly dataSource: DataSource,
+    private readonly auditService: AuditService,
+    private readonly notificationService: NotificationService,
   ) {}
 
-  async create(businessId: string, createDto: CreatePaymentDto): Promise<Payment> {
+  async create(businessId: string, createDto: CreatePaymentDto, userId?: string, userEmail?: string): Promise<Payment> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -44,13 +48,52 @@ export class PaymentService {
         cash.currentBalance += createDto.amount;
       } else {
         if (cash.currentBalance < createDto.amount) {
-          throw new NotFoundException('Insufficient cash balance');
+          throw new NotFoundException(`Insufficient cash balance. Available: $${cash.currentBalance.toFixed(2)}, Required: $${createDto.amount.toFixed(2)}`);
         }
         cash.currentBalance -= createDto.amount;
       }
 
       await queryRunner.manager.save(cash);
       await queryRunner.commitTransaction();
+
+      // Log audit
+      await this.auditService.log(
+        userId || 'system',
+        userEmail || 'system@localhost',
+        createDto.type === 'IN' ? 'recorded_payment_in' : 'recorded_payment_out',
+        'Payment',
+        savedPayment.id,
+        {
+          amount: savedPayment.amount,
+          type: savedPayment.type,
+          method: savedPayment.method,
+          description: savedPayment.description,
+          referenceId: savedPayment.referenceId,
+          referenceType: savedPayment.referenceType,
+          newCashBalance: cash.currentBalance,
+        },
+        businessId,
+      );
+
+      // Create notification for payment
+      try {
+        const title = createDto.type === 'IN' ? 'Payment Received' : 'Payment Sent';
+        const message = createDto.type === 'IN' 
+          ? `Payment of TND ${Number(savedPayment.amount).toFixed(3)} received - ${savedPayment.description || 'No description'}`
+          : `Payment of TND ${Number(savedPayment.amount).toFixed(3)} sent - ${savedPayment.description || 'No description'}`;
+        await this.notificationService.create(
+          businessId,
+          title,
+          message,
+          createDto.type === 'IN' ? 'success' : 'warning',
+          'payment',
+          `/payments/${savedPayment.id}`,
+          savedPayment.id,
+          'Payment',
+        );
+      } catch (err) {
+        console.error('Failed to create notification:', err);
+      }
 
       return savedPayment;
     } catch (err) {

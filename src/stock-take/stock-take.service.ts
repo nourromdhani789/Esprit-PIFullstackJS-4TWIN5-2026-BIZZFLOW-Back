@@ -6,6 +6,7 @@ import { StockTakeItem } from './entities/stock-take-item.entity';
 import { Product } from '../product/entities/product.entity';
 import { StockMovement } from '../stock-movement/entities/stock-movement.entity';
 import { CreateStockTakeDto, UpdateStockTakeDto, AddStockTakeItemDto, UpdateStockTakeItemDto, CompleteStockTakeDto } from './dto/stock-take.dto';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class StockTakeService {
@@ -18,15 +19,36 @@ export class StockTakeService {
     private productRepository: Repository<Product>,
     @InjectRepository(StockMovement)
     private stockMovementRepository: Repository<StockMovement>,
+    private auditService: AuditService,
   ) {}
 
-  async create(businessId: string, dto: CreateStockTakeDto): Promise<StockTake> {
+  async create(businessId: string, dto: CreateStockTakeDto, userId?: string, userEmail?: string): Promise<StockTake> {
     const stockTake = this.stockTakeRepository.create({
       ...dto,
       status: 'draft',
       businessId,
     });
-    return this.stockTakeRepository.save(stockTake);
+    const savedStockTake = await this.stockTakeRepository.save(stockTake);
+
+    // Log audit
+    try {
+      await this.auditService.log(
+        userId || 'system',
+        userEmail || 'system@localhost',
+        'created_stock_take',
+        'StockTake',
+        savedStockTake.id,
+        {
+          name: savedStockTake.name,
+          description: savedStockTake.description,
+        },
+        businessId,
+      );
+    } catch (err) {
+      console.error('Failed to log audit:', err);
+    }
+
+    return savedStockTake;
   }
 
   async findAll(businessId: string): Promise<StockTake[]> {
@@ -61,7 +83,7 @@ export class StockTakeService {
     return this.stockTakeRepository.save(stockTake);
   }
 
-  async startStockTake(id: string, businessId: string): Promise<StockTake> {
+  async startStockTake(id: string, businessId: string, userId?: string, userEmail?: string): Promise<StockTake> {
     const stockTake = await this.findOne(id, businessId);
     
     if (stockTake.status !== 'draft') {
@@ -93,13 +115,31 @@ export class StockTakeService {
     stockTake.status = 'in_progress';
     stockTake.totalProducts = products.length;
     stockTake.countDate = new Date();
-    return this.stockTakeRepository.save(stockTake);
+    const savedStockTake = await this.stockTakeRepository.save(stockTake);
+
+    // Log audit
+    await this.auditService.log(
+      userId || 'system',
+      userEmail || 'system@localhost',
+      'started_stock_take',
+      'StockTake',
+      savedStockTake.id,
+      {
+        name: savedStockTake.name,
+        totalProducts: savedStockTake.totalProducts,
+      },
+      businessId,
+    );
+
+    return savedStockTake;
   }
 
   async addOrUpdateItem(
     stockTakeId: string,
     businessId: string,
     dto: AddStockTakeItemDto,
+    userId?: string,
+    userEmail?: string
   ): Promise<StockTakeItem> {
     const stockTake = await this.findOne(stockTakeId, businessId);
     
@@ -145,6 +185,8 @@ export class StockTakeService {
     itemId: string,
     businessId: string,
     dto: UpdateStockTakeItemDto,
+    userId?: string,
+    userEmail?: string
   ): Promise<StockTakeItem> {
     const item = await this.stockTakeItemRepository.findOne({
       where: { id: itemId, businessId },
@@ -185,6 +227,8 @@ export class StockTakeService {
     id: string,
     businessId: string,
     dto: CompleteStockTakeDto,
+    userId?: string,
+    userEmail?: string
   ): Promise<{ stockTake: StockTake; adjustments: StockMovement[] }> {
     const { stockTake, items } = await this.findWithItems(id, businessId);
 
@@ -229,10 +273,27 @@ export class StockTakeService {
     stockTake.status = 'completed';
     const savedStockTake = await this.stockTakeRepository.save(stockTake);
 
+    // Log audit
+    await this.auditService.log(
+      userId || 'system',
+      userEmail || 'system@localhost',
+      'completed_stock_take',
+      'StockTake',
+      savedStockTake.id,
+      {
+        name: savedStockTake.name,
+        action: dto.action,
+        adjustmentCount: adjustments.length,
+        productsCounted: savedStockTake.productsCounted,
+        discrepancies: savedStockTake.discrepancies,
+      },
+      businessId,
+    );
+
     return { stockTake: savedStockTake, adjustments };
   }
 
-  async cancel(id: string, businessId: string): Promise<StockTake> {
+  async cancel(id: string, businessId: string, userId?: string, userEmail?: string): Promise<StockTake> {
     const stockTake = await this.findOne(id, businessId);
     
     if (stockTake.status === 'completed') {
@@ -240,11 +301,42 @@ export class StockTakeService {
     }
 
     stockTake.status = 'cancelled';
-    return this.stockTakeRepository.save(stockTake);
+    const savedStockTake = await this.stockTakeRepository.save(stockTake);
+
+    // Log audit
+    await this.auditService.log(
+      userId || 'system',
+      userEmail || 'system@localhost',
+      'cancelled_stock_take',
+      'StockTake',
+      savedStockTake.id,
+      {
+        name: savedStockTake.name,
+        previousStatus: stockTake.status,
+      },
+      businessId,
+    );
+
+    return savedStockTake;
   }
 
-  async delete(id: string, businessId: string): Promise<void> {
+  async delete(id: string, businessId: string, userId?: string, userEmail?: string): Promise<void> {
     const stockTake = await this.findOne(id, businessId);
+    
+    // Log audit before deletion
+    await this.auditService.log(
+      userId || 'system',
+      userEmail || 'system@localhost',
+      'deleted_stock_take',
+      'StockTake',
+      stockTake.id,
+      {
+        name: stockTake.name,
+        status: stockTake.status,
+      },
+      businessId,
+    );
+    
     await this.stockTakeRepository.remove(stockTake);
   }
 }

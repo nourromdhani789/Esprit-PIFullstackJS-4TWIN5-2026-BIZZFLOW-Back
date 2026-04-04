@@ -1,5 +1,5 @@
 import { InvoiceStatus } from '../entities/invoice.entity';
-import { IsString, IsOptional, IsEnum, IsNumber, IsArray, ValidateNested, Min, IsISO8601 } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, IsArray, ValidateNested, Min, IsISO8601, IsNotEmpty, IsUUID, IsEmail } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class CreateInvoiceItemDto {
@@ -22,16 +22,9 @@ export class CreateInvoiceItemDto {
 }
 
 export class CreateInvoiceDto {
-  @IsString()
+  @IsUUID()
+  @IsNotEmpty()
   clientId: string;
-
-  @IsOptional()
-  @IsString()
-  clientName?: string;
-
-  @IsOptional()
-  @IsString()
-  clientEmail?: string;
 
   @IsOptional()
   @IsEnum(InvoiceStatus)
@@ -45,6 +38,14 @@ export class CreateInvoiceDto {
   @IsISO8601()
   dueDate?: Date;
 
+  @IsOptional()
+  @IsString()
+  sourceQuoteId?: string;
+
+  @IsOptional()
+  @IsString()
+  sourceSalesOrderId?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateInvoiceItemDto)
@@ -52,16 +53,33 @@ export class CreateInvoiceDto {
 }
 
 export class UpdateInvoiceDto {
+  @IsUUID()
+  @IsOptional()
   clientId?: string;
-  clientName?: string;
-  clientEmail?: string;
+
+  @IsOptional()
+  @IsEnum(InvoiceStatus)
   status?: InvoiceStatus;
+
+  @IsOptional()
+  @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsISO8601()
   dueDate?: Date;
 }
 
 export class SendInvoiceEmailDto {
-  email: string;
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
   subject?: string;
+
+  @IsOptional()
+  @IsString()
   message?: string;
 }

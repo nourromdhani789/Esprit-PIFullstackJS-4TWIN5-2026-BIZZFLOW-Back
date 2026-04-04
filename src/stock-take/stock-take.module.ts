@@ -6,9 +6,10 @@ import { StockTake } from './entities/stock-take.entity';
 import { StockTakeItem } from './entities/stock-take-item.entity';
 import { Product } from '../product/entities/product.entity';
 import { StockMovement } from '../stock-movement/entities/stock-movement.entity';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([StockTake, StockTakeItem, Product, StockMovement])],
+  imports: [TypeOrmModule.forFeature([StockTake, StockTakeItem, Product, StockMovement]), AuditModule],
   controllers: [StockTakeController],
   providers: [StockTakeService],
   exports: [StockTakeService],

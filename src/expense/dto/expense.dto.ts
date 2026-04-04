@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsDateString, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
+import { IsString, IsNumber, IsDateString, IsOptional, IsEnum, IsNotEmpty, IsUUID } from 'class-validator';
 import type { ExpenseStatus } from '../entities/expense.entity';
 
 export class CreateExpenseDto {
@@ -18,9 +18,9 @@ export class CreateExpenseDto {
   @IsOptional()
   receiptUrl?: string;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
-  supplier?: string;
+  supplierId?: string;
 
   @IsString()
   @IsOptional()
@@ -44,9 +44,9 @@ export class UpdateExpenseDto {
   @IsOptional()
   receiptUrl?: string;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
-  supplier?: string;
+  supplierId?: string;
 
   @IsString()
   @IsOptional()

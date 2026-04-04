@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsDecimal, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
 import { TenantStatus } from '../../shared/enums/tenant-status.enum';
 
 export class CreateBusinessDto {
@@ -18,7 +19,8 @@ export class CreateBusinessDto {
   currency: string;
 
   @IsOptional()
-  @IsDecimal()
+  @Type(() => Number)
+  @IsNumber()
   taxRate: number;
 
   @IsOptional()

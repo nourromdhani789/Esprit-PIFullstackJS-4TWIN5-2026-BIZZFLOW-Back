@@ -7,6 +7,9 @@ export class PurchaseOrder {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'varchar', length: 36, nullable: true })
+  supplierId: string;
+
   @Column({ type: 'varchar', length: 255 })
   supplierName: string;
 

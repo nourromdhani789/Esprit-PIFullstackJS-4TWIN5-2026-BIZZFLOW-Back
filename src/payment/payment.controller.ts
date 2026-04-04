@@ -10,7 +10,7 @@ export class PaymentController {
 
   @Post()
   create(@Body() createDto: CreatePaymentDto, @Request() req) {
-    return this.paymentService.create(req.user.businessId, createDto);
+    return this.paymentService.create(req.user.businessId, createDto, req.user.id, req.user.email);
   }
 
   @Get()

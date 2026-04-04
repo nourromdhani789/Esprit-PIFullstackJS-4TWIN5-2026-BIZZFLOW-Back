@@ -23,7 +23,13 @@ export class BusinessService {
   }
 
   async findAll(): Promise<Business[]> {
-    return this.businessRepository.find();
+    const businesses = await this.businessRepository.find();
+    return businesses.map(b => {
+      if (b.taxRate !== undefined) {
+        b.taxRate = Number(b.taxRate);
+      }
+      return b;
+    });
   }
 
   async findOne(id: string): Promise<Business> {
@@ -35,6 +41,10 @@ export class BusinessService {
       throw new NotFoundException(`Business with ID ${id} not found`);
     }
 
+    if (business.taxRate !== undefined) {
+      business.taxRate = Number(business.taxRate);
+    }
+
     return business;
   }
 
@@ -43,7 +53,11 @@ export class BusinessService {
       where: { tenantId },
       take: 1,
     });
-    return businesses[0] || null;
+    const business = businesses[0] || null;
+    if (business && business.taxRate !== undefined) {
+      business.taxRate = Number(business.taxRate);
+    }
+    return business;
   }
 
   async update(id: string, updateBusinessDto: Partial<CreateBusinessDto>): Promise<Business> {

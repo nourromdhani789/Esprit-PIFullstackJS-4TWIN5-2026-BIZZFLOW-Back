@@ -18,8 +18,9 @@ import { ResetPasswordDto, ConfirmResetPasswordDto } from './dtos/reset-password
 import { VerifyEmailDto } from './dtos/verify-email.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { jwtConfig } from '../config/jwt.config';
-
 import { EmailService } from '../shared/services/email.service';
+import { ActivityLogService } from '../activity/activity-log.service';
+import { ActivityAction } from '../activity/entities/activity-log.entity';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,7 @@ export class AuthService {
     private invitationRepository: Repository<Invitation>,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private activityLogService: ActivityLogService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{ message: string; user: any }> {
@@ -158,6 +160,17 @@ export class AuthService {
     user.login();
 
     await this.userRepository.save(user);
+
+    // Log login activity
+    if (user.id) {
+      await this.activityLogService.createLog(
+        user.id,
+        ActivityAction.LOGIN,
+        user.tenantId,
+        'User logged in successfully',
+        { roleId: user.roleId, email: user.email },
+      );
+    }
 
     const business = await this.businessRepository.findOne({
       where: { tenantId: user.tenantId },

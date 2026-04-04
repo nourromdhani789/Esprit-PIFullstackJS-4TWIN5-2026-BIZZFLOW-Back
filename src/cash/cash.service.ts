@@ -29,23 +29,31 @@ export class CashService {
     return cash;
   }
 
-  // Calculate balance dynamically from all payments
+  // Get balance from cash table, sync with payments if needed
   async getBalance(businessId: string): Promise<number> {
+    const cash = await this.getOrCreateCash(businessId);
+    
+    // Calculate balance from payments to sync
     const payments = await this.paymentRepository.find({
       where: { businessId },
     });
-
-    let balance = 0;
+    let calculatedBalance = 0;
     for (const payment of payments) {
       const amount = Number(payment.amount);
       if (payment.type === 'IN') {
-        balance += amount;
+        calculatedBalance += amount;
       } else {
-        balance -= amount;
+        calculatedBalance -= amount;
       }
     }
-
-    return balance;
+    
+    // Sync if different
+    if (cash.currentBalance !== calculatedBalance) {
+      cash.currentBalance = calculatedBalance;
+      await this.cashRepository.save(cash);
+    }
+    
+    return cash.currentBalance;
   }
 
   async updateBalance(businessId: string, amount: number, type: 'IN' | 'OUT'): Promise<Cash> {

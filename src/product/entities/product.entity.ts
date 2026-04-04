@@ -1,6 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Business } from '../../business/entities/business.entity';
 
+export type ProductUsedFor = 'sales' | 'purchases' | 'both';
+export type ProductType = 'storable' | 'consumable' | 'service';
+
 @Entity('products')
 export class Product {
   @PrimaryGeneratedColumn('uuid')
@@ -29,6 +32,12 @@ export class Product {
 
   @Column({ type: 'varchar', length: 50, default: 'active' })
   status: string;
+
+  @Column({ type: 'enum', enum: ['sales', 'purchases', 'both'], default: 'both', name: 'used_for' })
+  usedFor: ProductUsedFor;
+
+  @Column({ type: 'enum', enum: ['storable', 'consumable', 'service'], default: 'storable', name: 'product_type' })
+  productType: ProductType;
 
   @ManyToOne(() => Business, business => business.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'business_id' })

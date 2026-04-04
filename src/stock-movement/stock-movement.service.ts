@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { StockMovement } from './entities/stock-movement.entity';
 import { Product } from '../product/entities/product.entity';
 import { CreateStockMovementDto, UpdateStockMovementDto, StockMovementFilterDto } from './dto/stock-movement.dto';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class StockMovementService {
@@ -12,9 +13,10 @@ export class StockMovementService {
     private readonly stockMovementRepository: Repository<StockMovement>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    private readonly auditService: AuditService,
   ) {}
 
-  async create(businessId: string, createDto: CreateStockMovementDto): Promise<StockMovement> {
+  async create(businessId: string, createDto: CreateStockMovementDto, userId?: string, userEmail?: string): Promise<StockMovement> {
     const product = await this.productRepository.findOne({
       where: { id: createDto.productId, businessId },
     });
@@ -49,6 +51,28 @@ export class StockMovementService {
     }
 
     await this.productRepository.save(product);
+
+    // Log audit for manual adjustments
+    if (savedMovement.reason === 'adjustment') {
+      await this.auditService.log(
+        userId || 'system',
+        userEmail || 'system@localhost',
+        'adjusted_stock',
+        'StockMovement',
+        savedMovement.id,
+        {
+          productId: savedMovement.productId,
+          productName: product.name,
+          type: savedMovement.type,
+          quantity: savedMovement.quantity,
+          previousQuantity: savedMovement.type === 'IN' ? product.quantity - savedMovement.quantity : product.quantity + savedMovement.quantity,
+          newQuantity: product.quantity,
+          reason: savedMovement.reason,
+          notes: savedMovement.notes,
+        },
+        businessId,
+      );
+    }
 
     return savedMovement;
   }

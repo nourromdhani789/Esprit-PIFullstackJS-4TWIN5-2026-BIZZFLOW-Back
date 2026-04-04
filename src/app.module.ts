@@ -18,6 +18,15 @@ import { CreditNoteModule } from './credit-note/credit-note.module';
 import { PaymentModule } from './payment/payment.module';
 import { CashModule } from './cash/cash.module';
 import { StockTakeModule } from './stock-take/stock-take.module';
+import { ClientModule } from './client/client.module';
+import { SupplierModule } from './supplier/supplier.module';
+import { AuditModule } from './audit/audit.module';
+import { NotificationModule } from './notification/notification.module';
+import { QuoteModule } from './quote/quote.module';
+import { SalesOrderModule } from './sales-order/sales-order.module';
+import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -25,6 +34,7 @@ import { StockTakeModule } from './stock-take/stock-take.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(databaseConfig),
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     TenantModule,
@@ -39,6 +49,14 @@ import { StockTakeModule } from './stock-take/stock-take.module';
     PaymentModule,
     CashModule,
     StockTakeModule,
+    ClientModule,
+    SupplierModule,
+    AuditModule,
+    NotificationModule,
+    QuoteModule,
+    SalesOrderModule,
+    AdminDashboardModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

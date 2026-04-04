@@ -12,12 +12,14 @@ import { Invitation } from './entities/invitation.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { jwtConfig } from '../config/jwt.config';
 import { EmailService } from '../shared/services/email.service';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Tenant, Business, Invitation]),
     PassportModule,
     ConfigModule,
+    ActivityModule,
     JwtModule.register({
       secret: jwtConfig.secret,
       signOptions: { expiresIn: '24h' },

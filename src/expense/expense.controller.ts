@@ -42,7 +42,7 @@ export class ExpenseController {
 
   @Post()
   create(@Body() createExpenseDto: CreateExpenseDto, @Request() req) {
-    return this.expenseService.create(req.user.businessId, createExpenseDto);
+    return this.expenseService.create(req.user.businessId, createExpenseDto, req.user.id, req.user.email);
   }
 
   @Get()
@@ -57,13 +57,13 @@ export class ExpenseController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto, @Request() req) {
-    return this.expenseService.update(id, req.user.businessId, updateExpenseDto);
+    return this.expenseService.update(id, req.user.businessId, updateExpenseDto, req.user.id, req.user.email);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Request() req) {
-    return this.expenseService.remove(id, req.user.businessId);
+    return this.expenseService.remove(id, req.user.businessId, req.user.id, req.user.email);
   }
 
   @Post('upload-receipt')
@@ -108,6 +108,7 @@ export class ExpenseController {
   ) {
     // Get user role from JWT payload
     const userRole = req.user.roleId || req.user.role || 'user';
+    console.log('User role:', userRole, 'User:', req.user);
     return this.expenseService.approve(id, req.user.businessId, approveDto, userRole);
   }
 }
