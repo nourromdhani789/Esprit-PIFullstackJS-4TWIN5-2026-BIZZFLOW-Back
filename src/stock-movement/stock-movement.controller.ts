@@ -10,7 +10,7 @@ export class StockMovementController {
 
   @Post()
   create(@Body() createDto: CreateStockMovementDto, @Request() req) {
-    return this.stockMovementService.create(req.user.businessId, createDto);
+    return this.stockMovementService.create(req.user.businessId, createDto, req.user.id, req.user.email);
   }
 
   @Get()

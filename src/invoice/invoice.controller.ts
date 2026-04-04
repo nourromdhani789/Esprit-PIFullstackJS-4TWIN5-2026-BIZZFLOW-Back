@@ -10,6 +10,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PdfService } from './services/pdf.service';
 import { EmailService } from '../shared/services/email.service';
 import { AiScannerService } from '../expense/services/ai-scanner.service';
+import { ClientService } from '../client/client.service';
 
 const scanStorage = diskStorage({
   destination: './uploads/scans',
@@ -28,6 +29,7 @@ export class InvoiceController {
     private readonly pdfService: PdfService,
     private readonly emailService: EmailService,
     private readonly aiScannerService: AiScannerService,
+    private readonly clientService: ClientService,
   ) {}
 
   @Post()
@@ -47,18 +49,18 @@ export class InvoiceController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto, @Request() req) {
-    return this.invoiceService.update(id, req.user.businessId, updateInvoiceDto);
+    return this.invoiceService.update(id, req.user.businessId, updateInvoiceDto, req.user.id, req.user.email);
   }
 
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body('status') status: InvoiceStatus, @Request() req) {
-    return this.invoiceService.updateStatus(id, req.user.businessId, status);
+    return this.invoiceService.updateStatus(id, req.user.businessId, status, req.user.id, req.user.email);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Request() req) {
-    return this.invoiceService.remove(id, req.user.businessId);
+    return this.invoiceService.remove(id, req.user.businessId, req.user.id, req.user.email);
   }
 
   @Get(':id/pdf')
@@ -75,9 +77,25 @@ export class InvoiceController {
   @HttpCode(HttpStatus.OK)
   async sendEmail(@Param('id') id: string, @Body() sendDto: SendInvoiceEmailDto, @Request() req) {
     const invoice = await this.invoiceService.findOne(id, req.user.businessId);
+    
+    // Determine recipient email
+    let recipientEmail = sendDto.email || invoice.client?.email;
+    
+    if (!recipientEmail) {
+      throw new BadRequestException('Client has no email. Please provide one.');
+    }
+    
+    // If email was provided via modal and client doesn't have one, save it to client
+    if (sendDto.email && !invoice.client?.email && invoice.client?.id) {
+      await this.clientService.update(invoice.client.id, req.user.businessId, { email: sendDto.email });
+    }
+    
     const pdfBuffer = await this.pdfService.generateInvoicePdf(invoice);
-    await this.emailService.sendInvoiceEmail(sendDto.email, invoice, pdfBuffer, sendDto.subject, sendDto.message);
-    return { message: 'Invoice sent successfully' };
+    await this.emailService.sendInvoiceEmail(recipientEmail, invoice, pdfBuffer, sendDto.subject, sendDto.message);
+    return { 
+      message: `Invoice sent successfully to ${recipientEmail}`,
+      recipient: recipientEmail
+    };
   }
 
   @Post('upload-scan')

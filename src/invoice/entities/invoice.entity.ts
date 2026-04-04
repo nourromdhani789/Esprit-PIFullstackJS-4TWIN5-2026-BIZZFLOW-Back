@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Business } from '../../business/entities/business.entity';
+import { Client } from '../../client/entities/client.entity';
 import { InvoiceItem } from './invoice-item.entity';
 
 export enum InvoiceStatus {
@@ -16,11 +17,9 @@ export class Invoice {
   @Column({ name: 'client_id' })
   clientId: string;
 
-  @Column({ name: 'client_name', nullable: true })
-  clientName: string;
-
-  @Column({ name: 'client_email', nullable: true })
-  clientEmail: string;
+  @ManyToOne(() => Client, client => client.invoices, { eager: true })
+  @JoinColumn({ name: 'client_id' })
+  client: Client;
 
   @Column({ name: 'business_id' })
   businessId: string;
@@ -53,6 +52,12 @@ export class Invoice {
 
   @Column({ name: 'invoice_number', nullable: true })
   invoiceNumber: string;
+
+  @Column({ name: 'source_quote_id', nullable: true })
+  sourceQuoteId: string;
+
+  @Column({ name: 'source_sales_order_id', nullable: true })
+  sourceSalesOrderId: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

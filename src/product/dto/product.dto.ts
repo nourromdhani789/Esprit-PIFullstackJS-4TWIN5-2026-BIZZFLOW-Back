@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsInt, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsInt, Min, IsEnum } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -25,6 +25,14 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   minimumStock?: number;
+
+  @IsOptional()
+  @IsEnum(['sales', 'purchases', 'both'])
+  usedFor?: 'sales' | 'purchases' | 'both';
+
+  @IsOptional()
+  @IsEnum(['storable', 'consumable', 'service'])
+  productType?: 'storable' | 'consumable' | 'service';
 }
 
 export class UpdateProductDto {
@@ -49,4 +57,12 @@ export class UpdateProductDto {
   @IsInt()
   @Min(0)
   minimumStock?: number;
+
+  @IsOptional()
+  @IsEnum(['sales', 'purchases', 'both'])
+  usedFor?: 'sales' | 'purchases' | 'both';
+
+  @IsOptional()
+  @IsEnum(['storable', 'consumable', 'service'])
+  productType?: 'storable' | 'consumable' | 'service';
 }

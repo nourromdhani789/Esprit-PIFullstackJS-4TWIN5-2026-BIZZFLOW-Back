@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Jo
 import { Product } from '../../product/entities/product.entity';
 
 export type StockMovementType = 'IN' | 'OUT';
-export type StockMovementReason = 'purchase' | 'sale' | 'adjustment' | 'return' | 'damage' | 'initial';
+export type StockMovementReason = 'purchase' | 'sale' | 'adjustment' | 'return' | 'damage' | 'initial' | 'sales_order_confirmed' | 'sales_order_cancelled';
 
 @Entity('stock_movements')
 export class StockMovement {
@@ -27,7 +27,7 @@ export class StockMovement {
 
   @Column({
     type: 'enum',
-    enum: ['purchase', 'sale', 'adjustment', 'return', 'damage', 'initial'],
+    enum: ['purchase', 'sale', 'adjustment', 'return', 'damage', 'initial', 'sales_order_confirmed', 'sales_order_cancelled'],
   })
   reason: StockMovementReason;
 

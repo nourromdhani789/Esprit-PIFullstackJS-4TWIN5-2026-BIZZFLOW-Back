@@ -3,8 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { PurchaseOrder } from './entities/purchase-order.entity';
 import { Product } from '../product/entities/product.entity';
+import { Supplier } from '../supplier/entities/supplier.entity';
 import { StockMovement } from '../stock-movement/entities/stock-movement.entity';
 import { CreatePurchaseOrderDto, UpdatePurchaseOrderDto, ReceivePurchaseOrderDto } from './dto/purchase-order.dto';
+import { AuditService } from '../audit/audit.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class PurchaseOrderService {
@@ -13,20 +16,55 @@ export class PurchaseOrderService {
     private readonly purchaseOrderRepository: Repository<PurchaseOrder>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(Supplier)
+    private readonly supplierRepository: Repository<Supplier>,
     @InjectRepository(StockMovement)
     private readonly stockMovementRepository: Repository<StockMovement>,
     private readonly dataSource: DataSource,
+    private readonly auditService: AuditService,
+    private readonly notificationService: NotificationService,
   ) {}
 
-  async create(businessId: string, createDto: CreatePurchaseOrderDto): Promise<PurchaseOrder> {
+  async create(businessId: string, createDto: CreatePurchaseOrderDto, userId?: string, userEmail?: string): Promise<PurchaseOrder> {
+    // Validate supplier exists
+    const supplier = await this.supplierRepository.findOne({
+      where: { id: createDto.supplierId, businessId },
+    });
+    if (!supplier) {
+      throw new BadRequestException('Supplier not found');
+    }
+
     const order = this.purchaseOrderRepository.create({
       ...createDto,
+      supplierId: supplier.id,
+      supplierName: supplier.name,
       businessId,
       date: createDto.date || new Date(),
       status: createDto.status || 'pending',
     });
 
-    return this.purchaseOrderRepository.save(order);
+    const savedOrder = await this.purchaseOrderRepository.save(order);
+
+    // Log audit
+    try {
+      await this.auditService.log(
+        userId || 'system',
+        userEmail || 'system@localhost',
+        'created_purchase_order',
+        'PurchaseOrder',
+        savedOrder.id,
+        {
+          supplierName: savedOrder.supplierName,
+          totalAmount: savedOrder.totalAmount,
+          date: savedOrder.date,
+        },
+        businessId,
+      );
+    } catch (err) {
+      console.error('Failed to log audit:', err);
+    }
+
+    return savedOrder;
   }
 
   async findAll(businessId: string, status?: string): Promise<PurchaseOrder[]> {
@@ -53,12 +91,24 @@ export class PurchaseOrderService {
     return order;
   }
 
-  async update(id: string, businessId: string, updateDto: UpdatePurchaseOrderDto): Promise<PurchaseOrder> {
+  async update(id: string, businessId: string, updateDto: UpdatePurchaseOrderDto, userId?: string, userEmail?: string): Promise<PurchaseOrder> {
     const order = await this.findOne(id, businessId);
 
     // Prevent updating received orders
     if (order.status === 'received') {
       throw new BadRequestException('Cannot update a received order');
+    }
+
+    // If updating supplier, validate it exists
+    if (updateDto.supplierId) {
+      const supplier = await this.supplierRepository.findOne({
+        where: { id: updateDto.supplierId, businessId },
+      });
+      if (!supplier) {
+        throw new BadRequestException('Supplier not found');
+      }
+      order.supplierId = supplier.id;
+      order.supplierName = supplier.name;
     }
 
     Object.assign(order, updateDto);
@@ -68,7 +118,9 @@ export class PurchaseOrderService {
   async markAsReceived(
     id: string, 
     businessId: string, 
-    receiveDto: ReceivePurchaseOrderDto
+    receiveDto: ReceivePurchaseOrderDto,
+    userId?: string,
+    userEmail?: string
   ): Promise<PurchaseOrder> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -123,6 +175,38 @@ export class PurchaseOrderService {
       }
 
       await queryRunner.commitTransaction();
+
+      // Log audit
+      await this.auditService.log(
+        'system',
+        'system@localhost',
+        'received_purchase_order',
+        'PurchaseOrder',
+        savedOrder.id,
+        {
+          supplierName: savedOrder.supplierName,
+          totalAmount: savedOrder.totalAmount,
+          itemCount: receiveDto.items?.length || 0,
+        },
+        businessId,
+      );
+
+      // Create notification for received order
+      try {
+        await this.notificationService.create(
+          businessId,
+          'Purchase Order Received',
+          `Order from ${savedOrder.supplierName} received. Stock updated automatically.`,
+          'success',
+          'purchase_order',
+          `/purchase-orders/${savedOrder.id}`,
+          savedOrder.id,
+          'PurchaseOrder',
+        );
+      } catch (err) {
+        console.error('Failed to create notification:', err);
+      }
+
       return savedOrder;
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -132,7 +216,7 @@ export class PurchaseOrderService {
     }
   }
 
-  async cancel(id: string, businessId: string): Promise<PurchaseOrder> {
+  async cancel(id: string, businessId: string, userId?: string, userEmail?: string): Promise<PurchaseOrder> {
     const order = await this.findOne(id, businessId);
 
     if (order.status === 'received') {
@@ -140,11 +224,42 @@ export class PurchaseOrderService {
     }
 
     order.status = 'cancelled';
-    return this.purchaseOrderRepository.save(order);
+    const savedOrder = await this.purchaseOrderRepository.save(order);
+
+    // Log audit
+    await this.auditService.log(
+      userId || 'system',
+      userEmail || 'system@localhost',
+      'cancelled_purchase_order',
+      'PurchaseOrder',
+      savedOrder.id,
+      {
+        supplierName: savedOrder.supplierName,
+        totalAmount: savedOrder.totalAmount,
+      },
+      businessId,
+    );
+
+    return savedOrder;
   }
 
-  async remove(id: string, businessId: string): Promise<void> {
+  async remove(id: string, businessId: string, userId?: string, userEmail?: string): Promise<void> {
     const order = await this.findOne(id, businessId);
+    
+    // Log audit before deletion
+    await this.auditService.log(
+      userId || 'system',
+      userEmail || 'system@localhost',
+      'deleted_purchase_order',
+      'PurchaseOrder',
+      order.id,
+      {
+        supplierName: order.supplierName,
+        totalAmount: order.totalAmount,
+      },
+      businessId,
+    );
+
     await this.purchaseOrderRepository.remove(order);
   }
 }

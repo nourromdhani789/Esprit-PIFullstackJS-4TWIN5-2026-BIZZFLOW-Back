@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Supplier } from '../../supplier/entities/supplier.entity';
 
 export type ExpenseStatus = 'pending' | 'approved' | 'rejected';
 
@@ -26,8 +27,12 @@ export class Expense {
   })
   status: ExpenseStatus;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  supplier: string;
+  @Column({ name: 'supplier_id', nullable: true })
+  supplierId: string;
+
+  @ManyToOne(() => Supplier, supplier => supplier.expenses, { eager: true })
+  @JoinColumn({ name: 'supplier_id' })
+  supplier: Supplier;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   description: string;

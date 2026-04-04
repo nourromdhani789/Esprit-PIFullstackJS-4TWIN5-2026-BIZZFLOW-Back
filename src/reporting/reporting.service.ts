@@ -3,12 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Invoice, InvoiceStatus } from '../invoice/entities/invoice.entity';
 import { Expense } from '../expense/entities/expense.entity';
+import { Product } from '../product/entities/product.entity';
+import { Client } from '../client/entities/client.entity';
 
 export interface KPIData {
   totalRevenue: number;
   totalExpenses: number;
   profit: number;
   profitMargin: number;
+  totalProducts: number;
+  totalClients: number;
+  totalInvoices: number;
 }
 
 export interface MonthlyData {
@@ -18,11 +23,21 @@ export interface MonthlyData {
   profit: number;
 }
 
+export interface TopClient {
+  clientId: string;
+  clientName: string;
+  totalInvoiced: number;
+  totalPaid: number;
+  outstandingBalance: number;
+  invoiceCount: number;
+}
+
 export interface DashboardData {
   kpis: KPIData;
   monthlyTrend: MonthlyData[];
   recentInvoices: Invoice[];
   recentExpenses: Expense[];
+  topClients: TopClient[];
 }
 
 export interface ReportFilters {
@@ -37,6 +52,10 @@ export class ReportingService {
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(Expense)
     private readonly expenseRepository: Repository<Expense>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(Client)
+    private readonly clientRepository: Repository<Client>,
   ) {}
 
   async getKPIs(businessId: string, filters?: ReportFilters): Promise<KPIData> {
@@ -75,11 +94,21 @@ export class ReportingService {
     const profit = totalRevenue - totalExpenses;
     const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
+    // Get counts
+    const [totalProducts, totalClients, totalInvoices] = await Promise.all([
+      this.productRepository.count({ where: { businessId } }),
+      this.clientRepository.count({ where: { businessId } }),
+      this.invoiceRepository.count({ where: { businessId } }),
+    ]);
+
     return {
       totalRevenue,
       totalExpenses,
       profit,
       profitMargin: parseFloat(profitMargin.toFixed(2)),
+      totalProducts,
+      totalClients,
+      totalInvoices,
     };
   }
 
@@ -127,10 +156,66 @@ export class ReportingService {
     return result;
   }
 
+  async getTopClients(businessId: string, limit: number = 5): Promise<TopClient[]> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    // Get all invoices for this month with client info
+    const invoices = await this.invoiceRepository.find({
+      where: {
+        businessId,
+        createdAt: Between(startOfMonth, endOfMonth),
+      },
+      relations: ['client'],
+      order: { createdAt: 'DESC' },
+    });
+
+    // Group by client and calculate totals
+    const clientMap = new Map<string, TopClient>();
+
+    for (const invoice of invoices) {
+      const clientId = invoice.clientId;
+      const clientName = invoice.client?.name || 'Unknown';
+      const amount = Number(invoice.totalAmount);
+
+      if (!clientMap.has(clientId)) {
+        clientMap.set(clientId, {
+          clientId,
+          clientName,
+          totalInvoiced: 0,
+          totalPaid: 0,
+          outstandingBalance: 0,
+          invoiceCount: 0,
+        });
+      }
+
+      const clientData = clientMap.get(clientId)!;
+      clientData.totalInvoiced += amount;
+      clientData.invoiceCount += 1;
+
+      if (invoice.status === InvoiceStatus.PAID) {
+        clientData.totalPaid += amount;
+      }
+    }
+
+    // Calculate outstanding balance and sort by totalInvoiced
+    const topClients = Array.from(clientMap.values())
+      .map((client) => ({
+        ...client,
+        outstandingBalance: client.totalInvoiced - client.totalPaid,
+      }))
+      .sort((a, b) => b.totalInvoiced - a.totalInvoiced)
+      .slice(0, limit);
+
+    return topClients;
+  }
+
   async getDashboardData(businessId: string): Promise<DashboardData> {
-    const [kpis, monthlyTrend] = await Promise.all([
+    const [kpis, monthlyTrend, topClients] = await Promise.all([
       this.getKPIs(businessId),
       this.getMonthlyTrend(businessId, 6),
+      this.getTopClients(businessId, 5),
     ]);
 
     // Get recent invoices (last 5)
@@ -152,6 +237,7 @@ export class ReportingService {
       monthlyTrend,
       recentInvoices,
       recentExpenses,
+      topClients,
     };
   }
 

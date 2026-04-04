@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Transform } from 'class-transformer';
 import { Tenant } from '../../tenant/entities/tenant.entity';
 
 @Entity('businesses')
@@ -26,6 +27,7 @@ export class Business {
   currency: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Transform(({ value }) => Number(value))
   taxRate: number;
 
   @Column({ nullable: true })

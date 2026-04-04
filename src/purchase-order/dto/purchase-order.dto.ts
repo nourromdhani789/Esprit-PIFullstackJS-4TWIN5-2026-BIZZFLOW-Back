@@ -17,7 +17,7 @@ export class PurchaseOrderItemDto {
 
 export class CreatePurchaseOrderDto {
   @IsString()
-  supplierName: string;
+  supplierId: string;
 
   @IsNumber()
   @Min(0)
@@ -45,7 +45,7 @@ export class CreatePurchaseOrderDto {
 export class UpdatePurchaseOrderDto {
   @IsOptional()
   @IsString()
-  supplierName?: string;
+  supplierId?: string;
 
   @IsOptional()
   @IsNumber()
@@ -69,8 +69,9 @@ export class ReceivePurchaseOrderDto {
   @IsString()
   notes?: string;
 
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PurchaseOrderItemDto)
-  items: PurchaseOrderItemDto[];
+  items?: PurchaseOrderItemDto[];
 }

@@ -10,7 +10,7 @@ export class PurchaseOrderController {
 
   @Post()
   create(@Body() createDto: CreatePurchaseOrderDto, @Request() req) {
-    return this.purchaseOrderService.create(req.user.businessId, createDto);
+    return this.purchaseOrderService.create(req.user.businessId, createDto, req.user.id, req.user.email);
   }
 
   @Get()
@@ -25,21 +25,21 @@ export class PurchaseOrderController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDto: UpdatePurchaseOrderDto, @Request() req) {
-    return this.purchaseOrderService.update(id, req.user.businessId, updateDto);
+    return this.purchaseOrderService.update(id, req.user.businessId, updateDto, req.user.id, req.user.email);
   }
 
   @Patch(':id/receive')
   markAsReceived(@Param('id') id: string, @Body() receiveDto: ReceivePurchaseOrderDto, @Request() req) {
-    return this.purchaseOrderService.markAsReceived(id, req.user.businessId, receiveDto);
+    return this.purchaseOrderService.markAsReceived(id, req.user.businessId, receiveDto, req.user.id, req.user.email);
   }
 
   @Patch(':id/cancel')
   cancel(@Param('id') id: string, @Request() req) {
-    return this.purchaseOrderService.cancel(id, req.user.businessId);
+    return this.purchaseOrderService.cancel(id, req.user.businessId, req.user.id, req.user.email);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
-    return this.purchaseOrderService.remove(id, req.user.businessId);
+    return this.purchaseOrderService.remove(id, req.user.businessId, req.user.id, req.user.email);
   }
 }

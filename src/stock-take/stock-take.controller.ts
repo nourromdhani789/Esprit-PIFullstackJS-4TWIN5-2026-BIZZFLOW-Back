@@ -35,26 +35,26 @@ export class StockTakeController {
 
   @Post(':id/items')
   addItem(@Param('id') id: string, @Body() dto: AddStockTakeItemDto, @Request() req) {
-    return this.stockTakeService.addOrUpdateItem(id, req.user.businessId, dto);
+    return this.stockTakeService.addOrUpdateItem(id, req.user.businessId, dto, req.user.id, req.user.email);
   }
 
   @Patch('items/:itemId')
   updateItem(@Param('itemId') itemId: string, @Body() dto: UpdateStockTakeItemDto, @Request() req) {
-    return this.stockTakeService.updateItem(itemId, req.user.businessId, dto);
+    return this.stockTakeService.updateItem(itemId, req.user.businessId, dto, req.user.id, req.user.email);
   }
 
   @Post(':id/complete')
   complete(@Param('id') id: string, @Body() dto: CompleteStockTakeDto, @Request() req) {
-    return this.stockTakeService.completeStockTake(id, req.user.businessId, dto);
+    return this.stockTakeService.completeStockTake(id, req.user.businessId, dto, req.user.id, req.user.email);
   }
 
   @Post(':id/cancel')
   cancel(@Param('id') id: string, @Request() req) {
-    return this.stockTakeService.cancel(id, req.user.businessId);
+    return this.stockTakeService.cancel(id, req.user.businessId, req.user.id, req.user.email);
   }
 
   @Delete(':id')
   delete(@Param('id') id: string, @Request() req) {
-    return this.stockTakeService.delete(id, req.user.businessId);
+    return this.stockTakeService.delete(id, req.user.businessId, req.user.id, req.user.email);
   }
 }
