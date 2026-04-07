@@ -24,6 +24,7 @@ import { Quote } from '../quote/entities/quote.entity';
 import { QuoteItem } from '../quote/entities/quote-item.entity';
 import { SalesOrder } from '../sales-order/entities/sales-order.entity';
 import { SalesOrderItem } from '../sales-order/entities/sales-order-item.entity';
+import { AIProcessedDocument } from '../document-processing/entities/ai-processed-document.entity';
 
 export const databaseConfig: TypeOrmModuleOptions = {
   type: 'mysql',
@@ -32,7 +33,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'pi_twin5_db',
-  entities: [User, Tenant, Business, Invitation, Product, Invoice, InvoiceItem, ActivityLog, Expense, Client, Supplier, StockMovement, StockTake, StockTakeItem, PurchaseOrder, CreditNote, Cash, Payment, AuditLog, Notification, Quote, QuoteItem, SalesOrder, SalesOrderItem], 
+  entities: [User, Tenant, Business, Invitation, Product, Invoice, InvoiceItem, ActivityLog, Expense, Client, Supplier, StockMovement, StockTake, StockTakeItem, PurchaseOrder, CreditNote, Cash, Payment, AuditLog, Notification, Quote, QuoteItem, SalesOrder, SalesOrderItem, AIProcessedDocument], 
   synchronize: true, // Enable to create/update tables automatically
   logging: true, 
 };

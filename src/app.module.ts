@@ -27,6 +27,7 @@ import { SalesOrderModule } from './sales-order/sales-order.module';
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ActivityModule } from './activity/activity.module';
+import { DocumentProcessingModule } from './document-processing/document-processing.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ActivityModule } from './activity/activity.module';
     SalesOrderModule,
     AdminDashboardModule,
     ActivityModule,
+    DocumentProcessingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
