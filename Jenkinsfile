@@ -1,11 +1,6 @@
 pipeline {
     agent any
     stages {
-        stage('Checkout') {
-            steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/nourromdhani789/PI_TWIN5_BACK'
-            }
-        }
         stage('Install') {
             steps {
                 sh 'npm install'
