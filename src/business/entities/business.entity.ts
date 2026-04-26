@@ -26,7 +26,7 @@ export class Business {
   @Column({ nullable: true })
   currency: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   @Transform(({ value }) => Number(value))
   taxRate: number;
 
