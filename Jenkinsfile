@@ -11,6 +11,17 @@ pipeline {
                 sh 'npm run test -- --watchAll=false --passWithNoTests'
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                        npx sonarqube-scanner \
+                        -Dsonar.projectKey=pi_twin5_back \
+                        -Dsonar.sources=src
+                    '''
+                }
+            }
+        }
         stage('Build') {
             steps {
                 sh 'npm run build'
