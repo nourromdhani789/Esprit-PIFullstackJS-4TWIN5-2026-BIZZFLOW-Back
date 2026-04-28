@@ -68,6 +68,25 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  // Face ID fields (optional, backward compatible)
+  @Column({ nullable: true, type: 'text' })
+  faceDescriptor?: string; // Encrypted JSON array of 128 face embeddings
+
+  @Column({ nullable: true })
+  faceEnrollmentDate?: Date;
+
+  @Column({ default: false })
+  isFaceIdEnabled: boolean;
+
+  @Column({ nullable: true, type: 'varchar', length: 255 })
+  faceIdEncryptionKey?: string; // Key identifier for encryption
+
+  @Column({ default: 0 })
+  faceLoginAttempts: number; // For rate limiting
+
+  @Column({ nullable: true, type: 'datetime' })
+  faceLoginLockoutExpires?: Date | null;
+
   // Methods
   login(): void {
     this.isActive = true;

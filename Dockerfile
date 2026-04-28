@@ -1,16 +1,16 @@
-# Stage 1: Build
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Stage 2: Production
 FROM node:20-alpine
+
 WORKDIR /app
+
+# Copy package files (optional but good practice)
 COPY package*.json ./
-RUN npm install --only=production
-COPY --from=build /app/dist ./dist
+
+# Copy already installed dependencies from Jenkins
+COPY node_modules ./node_modules
+
+# Copy built app
+COPY dist ./dist
+
 EXPOSE 3000
+
 CMD ["node", "dist/main.js"]
