@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { FaceAuthService } from './face-auth.service';
+import { FaceAuthController } from './face-auth.controller';
 import { User } from '../user/entities/user.entity';
 import { Tenant } from '../tenant/entities/tenant.entity';
 import { Business } from '../business/entities/business.entity';
@@ -25,8 +27,8 @@ import { ActivityModule } from '../activity/activity.module';
       signOptions: { expiresIn: '24h' },
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, EmailService],
-  exports: [AuthService],
+  controllers: [AuthController, FaceAuthController],
+  providers: [AuthService, FaceAuthService, JwtStrategy, EmailService],
+  exports: [AuthService, FaceAuthService],
 })
 export class AuthModule {}

@@ -28,12 +28,13 @@ import { AIProcessedDocument } from '../document-processing/entities/ai-processe
 
 export const databaseConfig: TypeOrmModuleOptions = {
   type: 'mysql',
-  host: process.env.DB_HOST || 'db',
+  host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '3306', 10),
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_DATABASE || 'app_db',
+  database: process.env.DB_DATABASE || 'pi_twin5_db',
   entities: [User, Tenant, Business, Invitation, Product, Invoice, InvoiceItem, ActivityLog, Expense, Client, Supplier, StockMovement, StockTake, StockTakeItem, PurchaseOrder, CreditNote, Cash, Payment, AuditLog, Notification, Quote, QuoteItem, SalesOrder, SalesOrderItem, AIProcessedDocument], 
   synchronize: true, // Enable to create/update tables automatically
   logging: true, 
 };
+
