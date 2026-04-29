@@ -31,13 +31,19 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'oussemadenguir999@gmail.com',
-        pass: 'dosv hhgf irdy ueht',
-      },
-    });
+  this.transporter = nodemailer.createTransport({
+    host: '74.125.133.108',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'oussemadenguir999@gmail.com',
+      pass: 'dosv hhgf irdy ueht',
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
   }
 
   async sendInvoiceEmail(
