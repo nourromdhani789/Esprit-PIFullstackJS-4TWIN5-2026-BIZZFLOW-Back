@@ -29,21 +29,17 @@ interface SalesOrderEmailData {
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
+  private frontendUrl: string;
 
   constructor(private configService: ConfigService) {
-  this.transporter = nodemailer.createTransport({
-    host: '74.125.133.108',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'oussemadenguir999@gmail.com',
-      pass: 'dosv hhgf irdy ueht',
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
+    this.transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'oussemadenguir999@gmail.com',
+        pass: 'dosv hhgf irdy ueht',
+      },
+    });
+    this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   }
 
   async sendInvoiceEmail(
@@ -164,7 +160,7 @@ export class EmailService {
     role: string,
     message?: string,
   ): Promise<void> {
-    const acceptUrl = `http://localhost:5173/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(to)}`;
+    const acceptUrl = `${this.frontendUrl}/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(to)}`;
 
     const roleLabels: Record<string, string> = {
       ACCOUNTANT: 'Accountant',
@@ -216,7 +212,7 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
-    const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+    const resetUrl = `${this.frontendUrl}/reset-password?token=${resetToken}`;
 
     const mailOptions = {
       from: 'oussemadenguir999@gmail.com',
@@ -244,7 +240,7 @@ export class EmailService {
   }
 
   async sendVerificationEmail(to: string, firstName: string, verificationToken: string): Promise<void> {
-    const verifyUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+    const verifyUrl = `${this.frontendUrl}/verify-email?token=${verificationToken}`;
 
     const mailOptions = {
       from: 'oussemadenguir999@gmail.com',
