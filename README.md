@@ -1,267 +1,320 @@
-# BizFlow AI - Backend API
+# BizFlow  – Intelligent Business Management Platform
 
-A comprehensive business management and financial tracking system powered by AI. Built with NestJS, TypeORM, and MySQL/PostgreSQL.
+## Overview
 
-## 🚀 Features
+This project was developed as part of the **PIDEV** (Projet Intégré de Développement) – 3rd Year Engineering Program at **Esprit School of Engineering** (Academic Year 2025–2026).
 
-### Core Modules
-- **Authentication & Authorization** - JWT-based auth with role-based access control
-- **User Management** - Multi-role system (Platform Admin, Business Owner, Admin, Accountant, Team Member)
-- **Business Management** - Multi-tenant architecture with business isolation
-- **Client & Supplier Management** - Full CRM functionality
+BizFlow AI is a comprehensive full-stack web application designed for Small and Medium Enterprises (SMEs) to manage their business operations efficiently. The platform combines traditional Enterprise Resource Planning (ERP) functionality with cutting-edge Artificial Intelligence capabilities to automate repetitive tasks, provide intelligent insights, and streamline financial management.
 
-### Financial Management
-- **Invoicing** - Create, manage, and track invoices with PDF generation
-- **Quotes & Sales Orders** - Convert quotes to invoices seamlessly
-- **Expenses** - Track and categorize business expenses with receipt uploads
-- **Payments** - Record money in/out transactions
-- **Credit Notes** - Handle refunds and adjustments
-- **Purchase Orders** - Manage supplier orders
+The application enables businesses to manage invoices, expenses, inventory, clients, suppliers, and team collaboration while leveraging AI for document processing, expense categorization, risk assessment, and intelligent automation.
 
-### Inventory & Stock
-- **Product Management** - Track storable and consumable products
-- **Stock Management** - Real-time inventory tracking
-- **Stock Movements** - Track all inventory changes
-- **Stock Take** - Physical inventory reconciliation
+## Features
+
+### Core Business Features
+- **Invoice Management**: Create, send, and track invoices with PDF generation and email delivery
+- **Quote Management**: Generate professional quotes that convert seamlessly to invoices
+- **Sales Orders**: Complete order processing workflow from creation to fulfillment
+- **Expense Tracking**: Track business expenses with receipt uploads and categorization
+- **Purchase Orders**: Manage supplier orders and procurement processes
+- **Inventory Management**: Real-time stock tracking with low stock alerts
+- **Client & Supplier CRM**: Comprehensive contact management with history tracking
+- **Credit Notes**: Handle refunds, returns, and invoice adjustments
+- **Cash Management**: Track cash flow with money in/out transactions
+- **Multi-Currency Support**: Handle transactions in multiple currencies
+- **Dashboard & Reporting**: Real-time KPIs, revenue charts, and financial reports
 
 ### AI-Powered Features
-- **AI Scanner (OCR)** - Extract data from invoices, receipts, and documents using Google Vision API
-- **AI Chatbot** - Natural language queries about business data
-- **AI Anomaly Detection** - Detect unusual invoice amounts and patterns
-- **AI Email Validation** - Verify client email deliverability
-- **AI Smart Auto-Fill** - Extract client info from pasted text
+- **AI Document Scanner (OCR)**: Extract text from invoices and receipts using Google Cloud Vision API with OCR.space fallback
+- **AI Expense Categorization**: Machine learning-based automatic categorization using TensorFlow.js and Universal Sentence Encoder
+- **AI Invoice Risk Scorer**: Neural network that predicts payment risk (Low/Medium/High) based on invoice amount, due date, and client payment history
+- **AI Chatbot**: Natural language assistant for business queries and navigation
+- **AI Anomaly Detection**: Automatic detection of unusual invoice amounts and patterns
+- **AI Email Validation**: Verify email deliverability before sending communications
+- **AI Smart Auto-Fill**: Extract client information from pasted text or email signatures
+- **AI Focus Mode**: Guided workflow assistance for enhanced productivity
+- **AI Onboarding**: Interactive first-time user experience with guided tours
 
-### Reporting & Analytics
-- **Dashboard Analytics** - Revenue, expenses, profit trends
-- **Financial Reports** - Export CSV/PDF reports
-- **Top Clients Analysis** - Revenue by client
-- **Activity Logs** - Track all user actions
+### Collaboration & Security Features
+- **Multi-Tenancy**: Complete data isolation between different businesses
+- **Role-Based Access Control**: 5 user roles (Platform Admin, Business Owner, Business Admin, Accountant, Team Member)
+- **Team Invitations**: Invite team members with pre-assigned roles and permissions
+- **Activity Logging**: Complete audit trail of all user actions
+- **Email Notifications**: Automated emails for invoices, invitations, and system events
 
-### Notifications & Activity
-- **Email Notifications** - Automated emails for invoices, team invites
-- **Activity Tracking** - Comprehensive audit trail
-- **Calendar Integration** - Schedule and track events
+## Tech Stack
 
-## 🛠️ Tech Stack
+### Frontend
+- **React 19** – Modern UI library with hooks and functional components
+- **TypeScript 5** – Type-safe JavaScript for better code quality and IDE support
+- **Vite 6** – Next-generation build tool for fast development and optimized production builds
+- **Tailwind CSS 4** – Utility-first CSS framework for rapid responsive design
+- **React Router 7** – Declarative routing with nested routes and route guards
+- **Axios** – Promise-based HTTP client for API communication
+- **Recharts & ApexCharts** – Data visualization and charting libraries
+- **FullCalendar** – Interactive calendar for scheduling and events
+- **jsPDF & html2canvas** – Client-side PDF generation
+- **CKEditor 5** – Rich text editor for content creation
+- **react-dnd** – Drag and drop functionality
 
-- **Framework**: NestJS 11.x
-- **Language**: TypeScript 5.x
-- **Database**: MySQL 8.x / PostgreSQL 15.x (via TypeORM)
-- **Authentication**: Passport.js with JWT
-- **File Storage**: Local filesystem (configurable for S3)
-- **PDF Generation**: Puppeteer
-- **OCR**: Google Cloud Vision API
-- **Email**: Nodemailer
-- **Scheduling**: @nestjs/schedule
+### Backend
+- **NestJS 11** – Progressive Node.js framework with modular architecture and dependency injection
+- **TypeScript 5** – Full type safety across the backend codebase
+- **TypeORM 0.3** – TypeScript ORM for database operations with decorators
+- **MySQL 8** – Relational database management system (PostgreSQL compatible)
+- **Passport.js** – Authentication middleware with JWT strategy
+- **TensorFlow.js 4** – Machine learning library running directly in Node.js
+- **@tensorflow-models/universal-sentence-encoder** – Pre-trained model for text embeddings
+- **Puppeteer 24** – Headless Chrome for PDF generation from HTML
+- **Nodemailer 6** – Email sending library for SMTP integration
+- **@nestjs/schedule** – Cron job scheduling for automated tasks
+- **class-validator & class-transformer** – DTO validation and transformation
+- **bcrypt** – Password hashing with salt rounds
+- **JWT** – JSON Web Tokens for authentication
 
-## 📋 Prerequisites
+### DevOps & Infrastructure
+- **Docker** – Containerization for consistent deployment environments
+- **Docker Compose** – Multi-container orchestration for local development
+- **Jenkins** – CI/CD pipeline automation with Jenkinsfile
+- **SonarQube** – Code quality analysis and security vulnerability detection
+- **Kubernetes** – Container orchestration for production deployment
+- **Nginx** – Reverse proxy and static file serving
+- **Git** – Version control with feature branch workflow
 
-- Node.js 22.x or higher
+### External APIs & Services
+- **Google Cloud Vision API** – OCR text extraction (1000 free requests/month)
+- **OCR.space API** – Fallback OCR service (25,000 free requests/month)
+- **SMTP Server** – Email delivery service integration
+
+## Architecture
+
+### System Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │   Browser    │  │   Mobile     │  │   Tablet     │       │
+│  │  (React App) │  │  (Responsive)│  │  (Responsive)│       │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘       │
+└─────────┼──────────────────┼──────────────────┼─────────────┘
+          │                  │                  │
+          └──────────────────┼──────────────────┘
+                             │ HTTPS (Port 443)
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      REVERSE PROXY                           │
+│                         (Nginx)                              │
+└─────────────────────────────┬───────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+          ▼                   ▼                   ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   FRONTEND      │    │     BACKEND     │    │   EXTERNAL      │
+│   SERVICE       │    │     SERVICE     │    │   SERVICES      │
+│                 │    │                 │    │                 │
+│  React + Vite   │    │  NestJS +       │    │  Google Vision  │
+│  Tailwind CSS   │    │  TypeORM        │    │  OCR.space      │
+│  Port: 80       │    │  TensorFlow.js  │    │  SMTP Server    │
+│                 │    │  Port: 3000     │    │                 │
+└────────┬────────┘    └────────┬────────┘    └─────────────────┘
+         │                      │
+         │                      ▼
+         │             ┌─────────────────┐
+         │             │   DATABASE      │
+         │             │                 │
+         │             │  MySQL 8.x      │
+         │             │  Port: 3306     │
+         │             │                 │
+         │             └─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│   FILE STORAGE  │
+│                 │
+│  Local FS / S3  │
+│  (Uploads)      │
+└─────────────────┘
+```
+
+### Backend Architecture (NestJS)
+The backend follows a modular architecture with 26 feature modules:
+
+- **Auth Module** – Authentication, JWT handling, password reset, email verification
+- **User Module** – User management with role-based permissions
+- **Tenant Module** – Multi-tenancy data isolation
+- **Business Module** – Business profile management
+- **Invoice Module** – Invoice lifecycle management with AI risk scoring
+- **Expense Module** – Expense tracking with AI categorization
+- **Client Module** – Customer relationship management
+- **Supplier Module** – Vendor management
+- **Product Module** – Product catalog and inventory
+- **Stock Movement Module** – Inventory tracking and alerts
+- **Quote Module** – Quote generation and conversion
+- **Sales Order Module** – Order processing workflow
+- **Purchase Order Module** – Procurement management
+- **Payment Module** – Payment record tracking
+- **Credit Note Module** – Refund and adjustment handling
+- **Document Processing Module** – OCR and document AI
+- **AI Module** – Machine learning services (categorization, risk scoring)
+- **Reporting Module** – Analytics and report generation
+- **Audit Module** – Activity logging and audit trails
+- **Notification Module** – Email notification system
+
+### Database Architecture
+- **Type**: Relational SQL (MySQL 8.x / PostgreSQL 15.x)
+- **ORM**: TypeORM with TypeScript decorators
+- **Entities**: 26 tables with relationships
+- **Multi-Tenancy**: Every entity includes `tenantId` for data isolation
+- **Synchronization**: Auto-create tables in development, migrations in production
+- **Key Relationships**:
+  - User → Tenant (Many-to-One)
+  - Business → Tenant (Many-to-One)
+  - Invoice → Client/Business (Many-to-One)
+  - Invoice → InvoiceItem (One-to-Many)
+  - Payment → Invoice (Polymorphic reference)
+
+### Frontend Architecture
+- **Component Structure**: Functional components with React Hooks
+- **State Management**: React Context API (AuthContext, BusinessContext, FocusModeContext)
+- **Routing**: React Router with protected routes and role-based guards
+- **HTTP Communication**: Axios with request/response interceptors
+- **Styling**: Tailwind CSS utility classes with responsive design
+- **AI Integration**: AI components (AIChatbotWidget, AIOnboarding, AIScanner)
+
+### CI/CD Pipeline
+```
+Developer Push → Git Webhook → Jenkins
+                                    ↓
+                    ┌───────────────┼───────────────┐
+                    ▼               ▼               ▼
+              [Install] → [Test] → [SonarQube]
+                                    ↓
+                              [Build App]
+                                    ↓
+                              [Docker Build]
+                                    ↓
+                              [Docker Push]
+                                    ↓
+                              [Trigger CD]
+                                    ↓
+                              [Kubernetes Deploy]
+```
+
+## Contributors
+
+### Development Team
+- **Oussema Denguir** 
+- **[Nour Romdhani 2]** 
+- **[Mayssen Kaabi 3]** 
+- **[Bechir Mnissi 2]** 
+
+
+### Project Supervision
+- **Supervisor**: [Mohamed Elhami] – Esprit School of Engineering
+
+## Academic Context
+
+**Institution:** Esprit School of Engineering – Tunisia
+
+**Program:** PIDEV (Projet Intégré de Développement) – 4 Year Engineering
+
+**Academic Year:** 2025–2026
+
+**Project Duration:** [01/02/2026] – [14/05/2026]
+
+
+This project demonstrates the application of software engineering principles, modern web development practices, and artificial intelligence integration learned during the 3rd year of the engineering program at Esprit School of Engineering.
+
+## Getting Started
+
+### Prerequisites
+- Node.js 20.x or higher
 - MySQL 8.x or PostgreSQL 15.x
-- Google Cloud Vision API credentials (for OCR features)
-- SMTP server configuration (for email notifications)
+- npm 10.x or yarn 1.22.x
+- Docker (optional, for containerized deployment)
 
-## 🚀 Getting Started
+### Installation
 
-### 1. Clone and Install
+1. **Clone the repository:**
+   ```bash
+   git clone [repository-url]
+   cd BizFlow-AI
+   ```
 
-```bash
-cd PI_TWIN5_BACK
-npm install
-```
+2. **Backend Setup:**
+   ```bash
+   cd PI_TWIN5_BACK
+   npm install
+   ```
 
-### 2. Environment Configuration
+3. **Configure environment variables:**
+   Create `.env` file in `PI_TWIN5_BACK`:
+   ```
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USERNAME=root
+   DB_PASSWORD=your_password
+   DB_DATABASE=bizflow_db
+   JWT_SECRET=your-secret-key-min-32-chars
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-app-password
+   GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json
+   OCR_SPACE_API_KEY=your-ocr-space-key
+   ```
 
-Create a `.env` file in the root directory:
+4. **Start Backend:**
+   ```bash
+   npm run start:dev
+   ```
 
-```env
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_USERNAME=root
-DB_PASSWORD=your_password
-DB_DATABASE=bizflow_db
+5. **Frontend Setup:**
+   ```bash
+   cd ../PI_TWIN5_FRONT
+   npm install
+   ```
 
-# JWT
-JWT_SECRET=your-super-secret-jwt-key-min-32-characters
-JWT_EXPIRATION=7d
+6. **Start Frontend:**
+   ```bash
+   npm run dev
+   ```
 
-# Email (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
+7. **Access Application:**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:3000
 
-# Google Vision API (for OCR)
-GOOGLE_APPLICATION_CREDENTIALS=./google-vision-credentials.json
+### Docker Deployment
 
-# App
-PORT=3000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-```
+1. **Build and start all services:**
+   ```bash
+   docker-compose up -d
+   ```
 
-### 3.  AI Scanner
+2. **Access services:**
+   - Frontend: http://localhost:80
+   - Backend API: http://localhost:3000
+   - MySQL: localhost:3306
 
+## Acknowledgments
 
+We would like to express our sincere gratitude to:
 
-### 4. Database Setup
+- **Esprit School of Engineering** for providing the academic framework and resources for this project
+- Our professors and supervisors for their guidance, feedback, and support throughout the development process
+- The open-source community for the incredible tools and libraries that made this project possible:
+  - NestJS Team for the excellent backend framework
+  - React Team for the frontend library
+  - TensorFlow.js Team for bringing ML to JavaScript
+  - Google Cloud for the Vision API free tier
+  - All contributors to the npm packages we used
 
-```bash
-# The app uses TypeORM synchronize in development (auto-creates tables)
-# For production, use migrations:
-npm run typeorm migration:run
-```
+- Our families and friends for their patience and encouragement during the intensive development period
 
-### 5. Run the Application
+Special thanks to the creators of the AI models and APIs that power our application's intelligent features.
 
-```bash
-# Development (with hot reload)
-npm run start:dev
+---
 
-# Production build
-npm run build
-npm run start:prod
-```
+**Developed with ❤️ at Esprit School of Engineering – Tunisia**
 
-The API will be available at `http://localhost:3000`
-
-## 📚 API Documentation
-
-### Authentication Endpoints
-```
-POST /auth/signup          - Register new user
-POST /auth/signin          - Login
-POST /auth/forgot-password - Request password reset
-POST /auth/reset-password  - Reset password with token
-```
-
-### Business Endpoints
-```
-GET  /business             - Get current business
-PUT  /business             - Update business
-POST /business/logo        - Upload business logo
-```
-
-### Invoice Endpoints
-```
-GET    /invoices           - List all invoices
-POST   /invoices           - Create new invoice
-GET    /invoices/:id       - Get invoice details
-PUT    /invoices/:id       - Update invoice
-DELETE /invoices/:id       - Delete invoice
-POST   /invoices/:id/pdf   - Generate PDF
-```
-
-### AI Endpoints
-```
-POST /ai/chat              - Chat with AI assistant
-POST /ai/validate-email    - Validate email address
-POST /ai/extract-client    - Extract client info from text
-POST /ai/detect-anomaly    - Detect invoice anomalies
-POST /ai/generate-report   - Generate AI business report
-```
-
-### Full API
-All endpoints require authentication (Bearer token) except auth endpoints. See the controller files in each module for complete documentation.
-
-## 🏗️ Project Structure
-
-```
-src/
-├── activity/           # Activity logging
-├── admin-dashboard/    # Platform admin features
-├── audit/             # Audit trail management
-├── auth/              # Authentication & authorization
-├── business/          # Business management
-├── cash/              # Cash/payments management
-├── client/            # Client CRM
-├── config/            # App configuration
-├── credit-note/       # Credit notes
-├── document-processing/ # OCR & document AI
-├── expense/           # Expense tracking
-├── invoice/           # Invoice management
-├── notification/      # Email notifications
-├── payment/           # Payment records
-├── product/           # Product catalog
-├── purchase-order/    # Purchase orders
-├── quote/             # Quotes management
-├── reporting/         # Analytics & reports
-├── sales-order/       # Sales orders
-├── shared/            # Shared utilities, guards, decorators
-├── stock-movement/    # Inventory movements
-├── stock-take/        # Physical inventory
-├── supplier/          # Supplier management
-├── tenant/            # Multi-tenancy middleware
-└── user/              # User management
-```
-
-## 🔐 Role-Based Access Control
-
-| Role | Permissions |
-|------|-------------|
-| PLATFORM_ADMIN | Full platform access, manage all businesses |
-| BUSINESS_OWNER | Full business access, manage team, all features |
-| BUSINESS_ADMIN | Similar to owner, can manage team |
-| ACCOUNTANT | Financial features, invoices, expenses, reports |
-| TEAM_MEMBER | Limited access, view clients, products, invoices |
-
-## 🧪 Testing
-
-```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Test coverage
-npm run test:cov
-```
-
-## 📦 Deployment
-
-### Production Build
-```bash
-npm run build
-npm run start:prod
-```
-
-### Docker (optional)
-```dockerfile
-# Dockerfile example
-FROM node:22-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-CMD ["node", "dist/main"]
-```
-
-## 🔧 Configuration
-
-Key environment variables:
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| DB_HOST | Database host | Yes |
-| DB_PORT | Database port | Yes |
-| DB_USERNAME | Database user | Yes |
-| DB_PASSWORD | Database password | Yes |
-| DB_DATABASE | Database name | Yes |
-| JWT_SECRET | JWT signing key (min 32 chars) | Yes |
-| SMTP_HOST | Email server host | Yes |
-| SMTP_USER | Email username | Yes |
-| SMTP_PASS | Email password | Yes |
-| GOOGLE_APPLICATION_CREDENTIALS | Path to Vision API credentials | For OCR |
-| PORT | API port (default: 3000) | No |
-
-## 📝 License
-
-UNLICENSED - Private software
-
-## 🤝 Support
-
-For support, email support@bizflow.ai or create an issue in the repository.
-
+**PIDEV 3A | 2025–2026**
