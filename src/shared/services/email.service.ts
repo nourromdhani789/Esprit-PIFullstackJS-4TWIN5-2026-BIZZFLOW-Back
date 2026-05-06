@@ -31,19 +31,18 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
-  this.transporter = nodemailer.createTransport({
-    host: '74.125.133.108',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'oussemadenguir999@gmail.com',
-      pass: 'dosv hhgf irdy ueht',
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
+    this.transporter = nodemailer.createTransport({
+      host: this.configService.get('MAIL_HOST') || 'smtp.gmail.com',
+      port: parseInt(this.configService.get('MAIL_PORT') || '465'),
+      secure: (this.configService.get('MAIL_PORT') || '465') === '465',
+      auth: {
+        user: this.configService.get('MAIL_USER') || 'oussemadenguir999@gmail.com',
+        pass: this.configService.get('MAIL_PASS') || 'dosv hhgf irdy ueht',
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
   }
 
   async sendInvoiceEmail(
@@ -164,7 +163,8 @@ export class EmailService {
     role: string,
     message?: string,
   ): Promise<void> {
-    const acceptUrl = `http://localhost:5173/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(to)}`;
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+    const acceptUrl = `${frontendUrl}/accept-invitation?token=${invitationToken}&email=${encodeURIComponent(to)}`;
 
     const roleLabels: Record<string, string> = {
       ACCOUNTANT: 'Accountant',
@@ -216,7 +216,8 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
-    const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`;
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
     const mailOptions = {
       from: 'oussemadenguir999@gmail.com',
@@ -244,7 +245,8 @@ export class EmailService {
   }
 
   async sendVerificationEmail(to: string, firstName: string, verificationToken: string): Promise<void> {
-    const verifyUrl = `http://localhost:5173/verify-email?token=${verificationToken}`;
+    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
 
     const mailOptions = {
       from: 'oussemadenguir999@gmail.com',
